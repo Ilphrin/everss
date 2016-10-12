@@ -17,10 +17,8 @@ struct FeedGetter<'data> {
 
 pub fn get_feed(buffer: &String) -> Channel {
   let mut feed_str = String::new();
-
   {
     let getter = FeedGetter{feed: &mut feed_str};
-
     match Url::parse(buffer.as_str()) {
         Ok(_) => {
           let mut easy = Easy::new();
@@ -33,17 +31,13 @@ pub fn get_feed(buffer: &String) -> Channel {
             }
             Ok(data.len())
           }).unwrap();
-          match transfer.perform() {
-            Ok(_) => {},
-            Err(e) => println!("Error while performing transfer: {}", e)
-          }
+          transfer.perform().unwrap_or(());
         },
         Err(e) => {
           getter.feed.push_str("ERROR");
           println!("Invalid address: {}", e);
         }
     }
-
   }
   match feed_str.parse::<Rss>() {
     Ok(value) => {
@@ -62,7 +56,7 @@ pub struct StreamRSS {
   pub items: Vec<Item>,
   pub object: Channel,
   pub last_update: DateTime<Local>,
-  // pub favico: Image,
+  // pub favicon: Image,
   // pub description: String,
 }
 
