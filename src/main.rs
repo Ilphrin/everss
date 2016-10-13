@@ -10,11 +10,10 @@ use std::io;
 use std::io::prelude::*;
 use glob::glob;
 use std::fs::File;
-use std::vec;
 
-fn print_feeds(&feeds: &Vec<streamrss::StreamRSS>) {
+fn print_feeds(ref feeds: &Vec<streamrss::StreamRSS>) {
   println!("==========");
-  for feed in feeds {
+  for feed in feeds.iter() {
     println!("{}: X elements. From {}", feed.name, feed.last_update);
   }
   println!("==========");
@@ -44,14 +43,15 @@ fn load_feeds() -> Vec<streamrss::StreamRSS> {
 
 fn main() {
   let mut buffer = String::new();
-  let mut feeds = load_feeds();
+  let feeds = load_feeds();
 
   loop {
     println!("What do you want to do?");
     println!("[1] List currently saved feeds");
-    println!("[2] Save a new feed");
+    println!("[2] Download a new feed");
     println!("[3] Remove a feed");
-    println!("[4] Leave");
+    println!("[4] Import a feed from XML");
+    println!("[5] Leave");
     println!("");
 
     io::stdin().read_line(&mut buffer).ok().expect("Failed to read line");
@@ -60,7 +60,8 @@ fn main() {
       "1" => print_feeds(&feeds),
       "2" => download_feed(),
       "3" => println!("REMOVING"),
-      "4" => break,
+      "4" => println!("IMPORTING"),
+      "5" => break,
       _ => println!("WRONG ANSWER JACK")
     }
     buffer.clear();
