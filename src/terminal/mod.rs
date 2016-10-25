@@ -77,9 +77,5 @@ impl Irss for Curses {
       Err(why) => println!("Can't remove {}: {}", file, why),
     }
   }
-
-  fn from_file(&mut self, file: &String) {
-
-  }
 }
 

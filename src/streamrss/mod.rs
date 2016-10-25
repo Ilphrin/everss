@@ -165,8 +165,5 @@ pub trait Irss {
 
   /// This method remove the feed from the feeds/ folder
   fn remove_feed(&mut self, index: usize);
-
-  /// This method get a file from the user's hard drive
-  fn from_file(&mut self, file: &String);
 }
 

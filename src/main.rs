@@ -21,8 +21,7 @@ fn main() {
     println!("[1] List currently saved feeds");
     println!("[2] Download a new feed");
     println!("[3] Remove a feed");
-    println!("[4] Import an XML from the hard drive");
-    println!("[5] Leave");
+    println!("[4] Leave");
     println!("");
 
     io::stdin().read_line(&mut buffer).ok().expect("Failed to read line");
@@ -45,9 +44,8 @@ fn main() {
           Err(why) => println!("[ERR] {}", why),
         }
       },
-      "4" => println!("IMPORTING"),
-      "5" => break,
-      _ => println!("WRONG ANSWER JACK")
+      "4" => break,
+      _ => println!("WRONG ANSWER :'( ")
     }
     buffer.clear();
   }
