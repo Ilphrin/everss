@@ -1,15 +1,13 @@
 use std::io;
 use std::io::prelude::*;
 use std::result;
-use glob::glob;
 use std::fs;
 use std::fs::File;
 
 use streamrss::*;
 
-
 pub struct Curses {
-  streams: Vec<StreamRSS>,
+  pub streams: Vec<StreamRSS>,
 }
 
 impl Curses {
@@ -42,21 +40,6 @@ impl Irss for Curses {
         self.streams.push(feed);
       }
       Err(why) => println!("Error while loading web feed: {}", why),
-    }
-  }
-
-  fn load_feeds(&mut self) {
-    let files = glob("./feeds/*").unwrap().filter_map(result::Result::ok);
-
-    for file in files {
-      let opened_file = File::open(file).unwrap();
-      let lines = io::BufReader::new(opened_file).lines().filter_map(result::Result::ok).collect::<Vec<String>>();
-      match StreamRSS::import(&lines) {
-        Ok(value) => {
-          self.streams.push(value);
-        }
-        Err(why) => println!("[ERR] While loading file feed: {}", why),
-      }
     }
   }
 

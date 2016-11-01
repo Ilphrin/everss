@@ -1,14 +1,16 @@
 use std::str;
-use std::io::prelude::*;
 use std::io;
+use std::io::prelude::*;
 use std::fs::{File, DirBuilder};
 use std::path::Path;
 use std::fmt;
+use std::result;
 
 use rss::*;
 use chrono::*;
 use url::{Url};
 use curl::easy::Easy;
+use glob::glob;
 
 #[warn(missing_docs)]
 pub fn get_feed(buffer: &String) -> Result<Rss, ReadError> {
@@ -48,7 +50,8 @@ pub fn save_feed(feed: &StreamRSS) {
     Err(_) => {},
   }
 
-  path.push_str(feed.name.as_str());
+  let mut file: String = str::replace(feed.name.as_str(), "/", "-");
+  path.push_str(file.as_str());
   path.push_str(".rss");
 
   let path = Path::new(path.as_str());
@@ -58,7 +61,7 @@ pub fn save_feed(feed: &StreamRSS) {
   match File::open(&path) {
     Err(_) => {
       file = match File::create(path) {
-        Err(_) => panic!("couldn't create {}", display),
+        Err(why) => panic!("couldn't create {} ==> {}", display, why),
         Ok(file) => file
       };
     }
@@ -160,10 +163,21 @@ pub trait Irss {
   /// passed as argument
   fn download_feed(&mut self);
 
-  /// This method load the feed from the feeds/ folder
-  fn load_feeds(&mut self);
-
   /// This method remove the feed from the feeds/ folder
   fn remove_feed(&mut self, index: usize);
 }
 
+pub fn load_feeds(streams: &mut Vec<StreamRSS>) {
+  let files = glob("./feeds/*").unwrap().filter_map(result::Result::ok);
+
+  for file in files {
+    let opened_file = File::open(file).unwrap();
+    let lines = io::BufReader::new(opened_file).lines().filter_map(result::Result::ok).collect::<Vec<String>>();
+    match StreamRSS::import(&lines) {
+      Ok(value) => {
+        streams.push(value);
+      }
+      Err(why) => println!("[ERR] While loading file feed: {}", why),
+    }
+  }
+}

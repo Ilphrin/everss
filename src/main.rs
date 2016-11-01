@@ -14,7 +14,7 @@ use std::io;
 fn main() {
   let mut buffer = String::new();
   let mut term: terminal::Curses = terminal::Curses::new();
-  term.load_feeds();
+  streamrss::load_feeds(&mut term.streams);
 
   loop {
     println!("What do you want to do?");
