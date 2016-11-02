@@ -1,8 +1,5 @@
 use std::io;
-use std::io::prelude::*;
-use std::result;
 use std::fs;
-use std::fs::File;
 
 use streamrss::*;
 
@@ -39,7 +36,7 @@ impl Irss for Curses {
         save_feed(&feed);
         self.streams.push(feed);
       }
-      Err(why) => println!("Error while loading web feed: {}", why),
+      Err(why) => println!("[ERROR] While loading web feed: {}", why),
     }
   }
 
@@ -57,7 +54,7 @@ impl Irss for Curses {
         println!("Removed {}", self.streams[index].name);
         self.streams.remove(index);
       },
-      Err(why) => println!("Can't remove {}: {}", file, why),
+      Err(why) => println!("[ERROR] Can't remove {}: {}", file, why),
     }
   }
 }

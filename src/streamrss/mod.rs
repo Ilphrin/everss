@@ -50,8 +50,7 @@ pub fn save_feed(feed: &StreamRSS) {
     Err(_) => {},
   }
 
-  let mut file: String = str::replace(feed.name.as_str(), "/", "-");
-  path.push_str(file.as_str());
+  path.push_str(feed.name.as_str());
   path.push_str(".rss");
 
   let path = Path::new(path.as_str());
@@ -120,7 +119,8 @@ impl StreamRSS {
     match get_feed(&url) {
       Ok(value) => {
         let Rss(feed) = value;
-        Ok(StreamRSS{url: url.clone(), name: feed.title.clone(), items: feed.items.clone(), object: feed, last_update:Local::now()})
+        let file: String = str::replace(feed.title.as_str(), "/", "-");
+        Ok(StreamRSS{url: url.clone(), name: file.clone(), items: feed.items.clone(), object: feed, last_update:Local::now()})
       }
       Err(_) => Err("Failed to get feed")
     }
