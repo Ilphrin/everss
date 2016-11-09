@@ -21,7 +21,8 @@ fn main() {
     println!("[1] List currently saved feeds");
     println!("[2] Download a new feed");
     println!("[3] Remove a feed");
-    println!("[4] Leave");
+    println!("[4] Show news");
+    println!("[5] Leave");
     println!("");
 
     io::stdin().read_line(&mut buffer).ok().expect("Failed to read line");
@@ -44,7 +45,17 @@ fn main() {
           Err(why) => println!("[ERR] {}", why),
         }
       },
-      "4" => break,
+      "4" => {
+        for elem in term.streams.iter() {
+          for item in elem.get_unread_articles() {
+            match item.title {
+              Some(ref v) => println!("{}", v),
+              None => {}
+            }
+          }
+        }
+      },
+      "5" => break,
       _ => println!("WRONG ANSWER :'( ")
     }
     buffer.clear();

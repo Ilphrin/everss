@@ -146,6 +146,36 @@ impl StreamRSS {
   pub fn new_name(&mut self, data: &String) {
     self.name = data.clone();
   }
+
+  /// We can compare two timestamps to see if an article has already been read
+  pub fn is_new(&self, item: &Item) -> bool {
+    match item.pub_date {
+      Some(ref v) => {
+        let tmp_date = Local;
+        let tstmp = match Local::datetime_from_str(&tmp_date, v,
+                                       "%a, %e %b %Y %H:%M:%S %z") {
+          Ok(v) => v.timestamp(),
+          Err(_) => panic!("NYUH!!"),
+        };
+        if tstmp < self.last_update.timestamp() {
+          return true;
+        }
+        return false;
+      }
+      None => false
+    }
+  }
+
+  /// Return all new articles from this feed
+  pub fn get_unread_articles(&self) -> Vec<&Item> {
+    let mut unread = Vec::new();
+    for item in self.items.iter() {
+      if self.is_new(&item) {
+        unread.push(item);
+      }
+    }
+    unread
+  }
 }
 
 impl fmt::Display for StreamRSS {
