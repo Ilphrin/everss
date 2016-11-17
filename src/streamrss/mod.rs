@@ -145,9 +145,9 @@ impl StreamRSS {
         let tstmp = match Local::datetime_from_str(&tmp_date, v,
                                        "%a, %e %b %Y %H:%M:%S %z") {
           Ok(v) => v.timestamp(),
-          Err(_) => panic!("NYUH!!"),
+          Err(_) => panic!("[ERROR] While in is_new from streamrss package"),
         };
-        if tstmp < self.last_update.timestamp() {
+        if tstmp > self.last_update.timestamp() {
           return true;
         }
         return false;
