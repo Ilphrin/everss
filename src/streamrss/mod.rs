@@ -5,6 +5,7 @@ use std::fs::{File, DirBuilder, OpenOptions};
 use std::path::Path;
 use std::fmt;
 use std::result;
+use std::io::BufReader;
 
 use rss::*;
 use chrono::*;
@@ -13,31 +14,45 @@ use curl::easy::Easy;
 use glob::glob;
 
 #[warn(missing_docs)]
-pub fn get_feed(buffer: &String) -> Result<Rss, ReadError> {
-  let mut feed_str = String::new();
-  {
-    let getter = FeedGetter{feed: &mut feed_str};
-    match Url::parse(buffer.as_str()) {
-      Ok(_) => {
-        let mut easy = Easy::new();
-        easy.url(buffer.as_str()).unwrap();
-        let mut transfer = easy.transfer();
-        transfer.write_function(|data| {
-          match str::from_utf8(data) {
-            Ok(elem) => getter.feed.push_str(elem),
-            Err(_) => {}
-          }
-          Ok(data.len())
-        }).unwrap();
-        transfer.perform().unwrap_or(());
-      },
-      Err(e) => {
-        getter.feed.push_str("ERROR");
-        println!("Invalid address: {}", e);
-      }
+pub fn get_feed(buffer: &String) -> Result<Channel, Error> {
+  let mut getter = String::new();
+
+  match Url::parse(buffer.as_str()) {
+    Ok(_) => {
+      let mut easy = Easy::new();
+      easy.url(buffer.as_str()).unwrap();
+      let mut transfer = easy.transfer();
+      transfer.write_function(|data| {
+        match str::from_utf8(data) {
+          Ok(elem) => getter.push_str(elem),
+          Err(_) => {}
+        }
+        Ok(data.len())
+      }).unwrap();
+      transfer.perform().unwrap_or(());
+    },
+    Err(e) => {
+      getter.push_str("ERROR");
+      println!("Invalid address: {}", e);
     }
   }
-  feed_str.parse::<Rss>()
+
+  let mut tmp_file = File::create("tmp.rss").unwrap();
+  match tmp_file.write_all(getter.as_bytes()) {
+    Ok(_) => {},
+    Err(_) => {}
+  }
+  let reader = BufReader::new(tmp_file);
+
+  match Channel::read_from(reader) {
+    Ok(value) => {
+      File::open("tmp.rss").unwrap().set_len(0).unwrap();
+      return Ok(value);
+    }
+    Err(err) => {
+      return Err(err);
+    }
+  }
 }
 
 #[warn(missing_docs)]
@@ -74,10 +89,6 @@ pub fn save_feed(feed: &StreamRSS) {
   }
 }
 
-struct FeedGetter<'data> {
-  feed: &'data mut String
-}
-
 /// Main class for managing RSS streams, loaded from and XML file
 pub struct StreamRSS {
   pub url: String,
@@ -108,9 +119,8 @@ impl StreamRSS {
 
     match get_feed(&url) {
       Ok(value) => {
-        let Rss(feed) = value;
-        let file: String = str::replace(feed.title.as_str(), "/", "-");
-        Ok(StreamRSS{url: url.clone(), name: file.clone(), items: feed.items.clone(), object: feed, last_update:Local::now()})
+        let file: String = str::replace(value.title.as_str(), "/", "-");
+        Ok(StreamRSS{url: url.clone(), name: file.clone(), items: value.items.clone(), object: value, last_update:Local::now()})
       }
       Err(_) => Err("Failed to get feed")
     }
