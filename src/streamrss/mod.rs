@@ -1,7 +1,7 @@
 use std::str;
 use std::io;
 use std::io::prelude::*;
-use std::fs::{File, DirBuilder};
+use std::fs::{File, DirBuilder, OpenOptions};
 use std::path::Path;
 use std::fmt;
 use std::result;
@@ -55,20 +55,10 @@ pub fn save_feed(feed: &StreamRSS) {
 
   let path = Path::new(path.as_str());
   let display = path.display();
-  let mut file;
-
-  match File::open(&path) {
-    Err(_) => {
-      file = match File::create(path) {
-        Err(why) => panic!("couldn't create {} ==> {}", display, why),
-        Ok(file) => file
-      };
-    }
-    Ok(_) => {
-      println!("[WARN] File {} already exists", display);
-      return;
-    }
-  }
+  let mut file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true).open(path).unwrap();
 
   let mut all_file = String::new();
   all_file.push_str(feed.name.as_str());
@@ -76,12 +66,12 @@ pub fn save_feed(feed: &StreamRSS) {
   all_file.push_str(feed.url.as_str());
   all_file.push('\n');
   all_file.push_str(feed.last_update.format("%Y-%m-%d %H:%M:%S %:z").to_string().as_str());
+  all_file.push('\n');
 
   match file.write_all(all_file.as_bytes()) {
     Err(_) => println!("[ERROR] Couldn't write to {}", display),
     Ok(_) => println!("[SUCCESS] Successfully wrote to {}", display)
   }
-  println!("");
 }
 
 struct FeedGetter<'data> {
@@ -181,6 +171,13 @@ impl StreamRSS {
 impl fmt::Display for StreamRSS {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "{}: {} elements. From {}", self.name, self.items.len(), self.last_update)
+  }
+}
+
+impl Drop for StreamRSS {
+  fn drop(&mut self) {
+    self.last_update = Local::now();
+    save_feed(self);
   }
 }
 
