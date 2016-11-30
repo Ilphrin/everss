@@ -42,11 +42,13 @@ pub fn get_feed(buffer: &String) -> Result<Channel, Error> {
     Ok(_) => {},
     Err(_) => {}
   }
-  let reader = BufReader::new(tmp_file);
+
+  let file_read = File::open("tmp.rss").unwrap();
+  let reader = BufReader::new(file_read);
 
   match Channel::read_from(reader) {
     Ok(value) => {
-      File::open("tmp.rss").unwrap().set_len(0).unwrap();
+      File::open("tmp.rss").unwrap().set_len(0);
       return Ok(value);
     }
     Err(err) => {
