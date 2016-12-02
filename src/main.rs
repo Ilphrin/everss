@@ -49,14 +49,18 @@ fn main() {
         for elem in term.streams.iter() {
           for item in elem.get_unread_articles() {
             match item.title {
-              Some(ref v) => print!("{}", v),
+              Some(ref v) => {
+                print!("{}", v);
+                match item.content {
+                  Some(ref v) => {
+                    println!("  ==> {}", v);
+                    io::stdin().read_line(&mut buffer);
+                  }
+                  None => println!(""),
+                }
+              },
               None => {}
             }
-            match item.pub_date {
-              Some(ref v) => println!("  ==> {}", v),
-              None => {}
-            }
-            io::stdin().read_line(&mut buffer);
           }
         }
       },
