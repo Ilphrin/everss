@@ -12,11 +12,3 @@ glob = "*"
 
 [dependencies.url]
 git = "https://github.com/servo/rust-url"
-
-[profile.dev]
-debug = true
-opt-level = 0
-
-[profile.release]
-opt-level = 3
-debug = false

@@ -25,7 +25,6 @@ pub struct StreamRSS {
 }
 
 impl StreamRSS {
-  /// Download a new XML file from an url and create a StreamRSS from it
   pub fn new(url: &String) -> Result<StreamRSS, &str> {
     //! We get a new StreamRSS from an XML file downloaded on the web with curl
     //! # Example
@@ -51,6 +50,7 @@ impl StreamRSS {
   }
 
   pub fn import<'a>(data: &'a Vec<String>) -> Result<StreamRSS, &'a str> {
+    //! Load a feed from the content of a saved file
     match StreamRSS::new(&data[1]) {
       Ok(mut feed) => {
         feed.update(&data[2]);
@@ -74,7 +74,7 @@ impl StreamRSS {
     self.name = data.clone();
   }
 
-  /// We can compare two timestamps to see if an article has already been read
+  /// Compare two timestamps to see if an article has already been read
   pub fn is_new(&self, item: &Item) -> bool {
     match item.pub_date {
       Some(ref v) => {
@@ -200,6 +200,11 @@ pub fn save_feed(feed: &StreamRSS) {
   }
 }
 
+/// # Examples
+///```
+/// let mut streams:Vec<StreamRSS>;
+/// load_feeds(&mut streams);
+///```
 pub fn load_feeds(streams: &mut Vec<StreamRSS>) {
   let files = glob("./feeds/*").unwrap().filter_map(result::Result::ok);
 
