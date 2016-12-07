@@ -3,7 +3,9 @@ extern crate url;
 extern crate curl;
 extern crate chrono;
 extern crate glob;
+extern crate term;
 
+#[macro_use]
 pub mod streamrss;
 pub mod terminal;
 

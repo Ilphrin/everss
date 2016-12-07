@@ -37,7 +37,7 @@ impl Irss for Curses {
         save_feed(&feed);
         self.streams.push(feed);
       }
-      Err(why) => println!("[ERROR] While loading web feed: {}", why),
+      Err(why) => perror!("While loading web feed:", why),
     }
   }
 

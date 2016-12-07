@@ -9,6 +9,7 @@ curl = "0.3.0"
 time = "0.1.35"
 chrono = "0.2"
 glob = "*"
+term = "0.2"
 
 [dependencies.url]
 git = "https://github.com/servo/rust-url"

@@ -12,6 +12,39 @@ use chrono::*;
 use url::{Url};
 use curl::easy::Easy;
 use glob::glob;
+use term;
+
+#[macro_export]
+macro_rules! perror {
+  ( $($w:expr),* ) => {
+    {
+      let mut t = ::term::stdout().unwrap();
+      t.fg(::term::color::RED).unwrap();
+      print!("[ERROR]");
+      t.fg(::term::color::WHITE).unwrap();
+      $(
+        print!(" {}", $w);
+      )*
+      println!("");
+    }
+  }
+}
+
+#[macro_export]
+macro_rules! psuccess {
+  ( $($w:expr),* ) => {
+    {
+      let mut t = ::term::stdout().unwrap();
+      t.fg(::term::color::GREEN).unwrap();
+      print!("[SUCCESS]");
+      t.fg(::term::color::WHITE).unwrap();
+      $(
+        print!(" {}", $w);
+      )*
+      println!("");
+    }
+  }
+}
 
 /// Main class for managing RSS streams, loaded from and XML file
 pub struct StreamRSS {
@@ -65,7 +98,7 @@ impl StreamRSS {
   pub fn update(&mut self, data: &str) {
     match Local.datetime_from_str(data, "%Y-%m-%d %H:%M:%S %:z") {
       Ok(value) => self.last_update = value,
-      Err(err) => println!("[ERROR] In streamrss::update: {}", err),
+      Err(err) => perror!("In streamrss::update", err),
     }
   }
 
@@ -83,7 +116,7 @@ impl StreamRSS {
                                        "%a, %e %b %Y %H:%M:%S %z") {
           Ok(v) => v.timestamp(),
           Err(err) => {
-            println!("[ERROR] While in streamrss::is_new: {} with", err);
+            perror!("In streamrss::is_new: ", err);
             return false;
           }
 
@@ -195,8 +228,8 @@ pub fn save_feed(feed: &StreamRSS) {
   all_file.push('\n');
 
   match file.write_all(all_file.as_bytes()) {
-    Err(_) => println!("[ERROR] Couldn't write to {}", display),
-    Ok(_) => println!("[SUCCESS] Successfully wrote to {}", display)
+    Err(_) => perror!("Couldn't write to ", display),
+    Ok(_) => psuccess!("Successfully wrote to ", display)
   }
 }
 
