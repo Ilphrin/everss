@@ -12,7 +12,6 @@ use chrono::*;
 use url::{Url};
 use curl::easy::Easy;
 use glob::glob;
-use term;
 
 #[macro_export]
 macro_rules! perror {
@@ -111,15 +110,12 @@ impl StreamRSS {
   pub fn is_new(&self, item: &Item) -> bool {
     match item.pub_date {
       Some(ref v) => {
-        let tmp_date = Local;
-        let tstmp = match Local::datetime_from_str(&tmp_date, v,
-                                       "%a, %e %b %Y %H:%M:%S %z") {
-          Ok(v) => v.timestamp(),
+        let tstmp = match DateTime::parse_from_rfc2822(v) {
+          Ok(ret) => ret.timestamp(),
           Err(err) => {
-            perror!("In streamrss::is_new: ", err);
+            perror!("In streamrss::is_new:", err);
             return false;
           }
-
         };
         if tstmp > self.last_update.timestamp() {
           return true;
@@ -129,7 +125,6 @@ impl StreamRSS {
       None => false
     }
   }
-
   /// Return all new articles from this feed
   pub fn get_unread_articles(&self) -> Vec<&Item> {
     let mut unread = Vec::new();
@@ -190,7 +185,7 @@ pub fn get_feed(buffer: &String) -> Result<Channel, Error> {
 
   match Channel::read_from(reader) {
     Ok(value) => {
-      File::open("tmp.rss").unwrap().set_len(0);
+      File::open("tmp.rss").unwrap().set_len(0).unwrap_or({});
       return Ok(value);
     }
     Err(err) => {

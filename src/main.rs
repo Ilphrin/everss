@@ -56,9 +56,17 @@ fn main() {
                 match item.content {
                   Some(ref v) => {
                     println!("  ==> {}", v);
-                    io::stdin().read_line(&mut buffer);
+                    io::stdin().read_line(&mut buffer).unwrap();
                   }
-                  None => println!(""),
+                  None => {
+                    match item.description {
+                      Some(ref v) => {
+                        println!(" ==> {}", v);
+                        io::stdin().read_line(&mut buffer).unwrap();
+                      },
+                      None => {}
+                    }
+                  }
                 }
               },
               None => {}
