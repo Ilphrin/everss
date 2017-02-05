@@ -12,6 +12,7 @@ pub mod terminal;
 use streamrss::*;
 
 use std::io;
+use std::io::Write;
 
 fn main() {
   let mut buffer = String::new();
@@ -25,7 +26,8 @@ fn main() {
     println!("[3] Remove a feed");
     println!("[4] Show news");
     println!("[5] Leave");
-    println!("");
+    print!("> ");
+    io::stdout().flush().ok().expect("Failed to flush stdout");
 
     io::stdin().read_line(&mut buffer).ok().expect("Failed to read line");
     buffer = String::from(buffer.trim_right());

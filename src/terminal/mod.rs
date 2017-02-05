@@ -1,5 +1,6 @@
 use std::io;
 use std::fs;
+use std::io::Write;
 
 use streamrss::*;
 
@@ -28,6 +29,8 @@ impl Irss for Curses {
   }
 
   fn download_feed(&mut self) {
+    print!("(url)> ");
+    io::stdout().flush().ok().expect("Failed to flush stdout");
     let mut url = String::new();
     io::stdin().read_line(&mut url).ok().expect("Failed to read line");
     url = String::from(url.trim_right());
