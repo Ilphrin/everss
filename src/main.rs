@@ -3,7 +3,7 @@ extern crate url;
 extern crate curl;
 extern crate chrono;
 extern crate glob;
-extern crate term;
+extern crate termion;
 
 #[macro_use]
 pub mod streamrss;
@@ -14,6 +14,7 @@ use streamrss::*;
 use std::io;
 
 fn main() {
+  print!("{clear}{goto}", clear = termion::clear::All , goto = termion::cursor::Goto(1,1));
   let mut buffer = String::new();
   let mut term: terminal::Curses = terminal::Curses::new();
   streamrss::load_feeds(&mut term.streams);
@@ -29,51 +30,12 @@ fn main() {
 
     io::stdin().read_line(&mut buffer).ok().expect("Failed to read line");
     buffer = String::from(buffer.trim_right());
+    print!("{clear}{goto}", clear = termion::clear::All , goto = termion::cursor::Goto(1,1));
     match buffer.as_str() {
       "1" => term.print_list_feeds(),
       "2" => term.download_feed(),
-      "3" => {
-        println!("Which feed do you want to remove?");
-        println!("(Enter -1 if you just want to go back and see the list)");
-        let mut value = String::new();
-        io::stdin().read_line(&mut value).ok().expect("Failed to read line");
-        value.pop();
-        match value.parse::<i64>() {
-          Ok(x) => {
-            if x >= 0 {
-              term.remove_feed(x as usize);
-            }
-          }
-          Err(why) => println!("[ERR] {}", why),
-        }
-      },
-      "4" => {
-        for elem in term.streams.iter() {
-          for item in elem.get_unread_articles() {
-            match item.title {
-              Some(ref v) => {
-                print!("{}", v);
-                match item.content {
-                  Some(ref v) => {
-                    println!("  ==> {}", v);
-                    io::stdin().read_line(&mut buffer).unwrap();
-                  }
-                  None => {
-                    match item.description {
-                      Some(ref v) => {
-                        println!(" ==> {}", v);
-                        io::stdin().read_line(&mut buffer).unwrap();
-                      },
-                      None => {}
-                    }
-                  }
-                }
-              },
-              None => {}
-            }
-          }
-        }
-      },
+      "3" => term.remove_feed(),
+      "4" => term.output_news(),
       "5" => break,
       _ => println!("WRONG ANSWER :'( ")
     }

@@ -17,10 +17,9 @@ use glob::glob;
 macro_rules! perror {
   ( $($w:expr),* ) => {
     {
-      let mut t = ::term::stdout().unwrap();
-      t.fg(::term::color::RED).unwrap();
-      print!("[ERROR]");
-      t.fg(::term::color::WHITE).unwrap();
+      print!("{red}[ERROR]{white}", 
+        red = ::termion::color::Fg(::termion::color::Red),
+        white = ::termion::color::Fg(::termion::color::Reset));
       $(
         print!(" {}", $w);
       )*
@@ -33,10 +32,9 @@ macro_rules! perror {
 macro_rules! psuccess {
   ( $($w:expr),* ) => {
     {
-      let mut t = ::term::stdout().unwrap();
-      t.fg(::term::color::GREEN).unwrap();
-      print!("[SUCCESS]");
-      t.fg(::term::color::WHITE).unwrap();
+      print!("{green}[SUCCESS]{white}",
+             green = ::termion::color::Fg(::termion::color::Green),
+             white = ::termion::color::Fg(::termion::color::Reset));
       $(
         print!(" {}", $w);
       )*
@@ -260,5 +258,7 @@ pub trait Irss {
   fn download_feed(&mut self);
 
   /// This method remove the feed from the feeds/ folder
-  fn remove_feed(&mut self, index: usize);
+  fn remove_feed(&mut self);
+
+  fn output_news(&mut self);
 }
